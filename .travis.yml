@@ -1,0 +1,19 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t abdulgaffersiam/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run abdulgaffersiam/react-test npm test -- --coverage
+after_success:
+  - docker build -t abdulgaffersiam/multy-client ./client
+  - docker build -t abdulgaffersiam/multy-nginx ./nginx
+  - docker build -t abdulgaffersiam/multy-server ./server
+  - docker build -t abdulgaffersiam/multy-worker ./worker
+  # Log in to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push into docker hub
+  - docker push abdulgaffersiam/multy-client
+  - docker push abdulgaffersiam/multy-nginx
+  - docker push abdulgaffersiam/multy-server
+  - docker push abdulgaffersiam/multy-worker
